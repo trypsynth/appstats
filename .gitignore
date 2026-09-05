@@ -1,0 +1,34 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Local machine config
+local.properties
+
+# Signing material, never commit this
+*.jks
+*.keystore
+keystore.properties
+
+# Build outputs
+*.apk
+*.aab
+*.aar
+captures/
+.cxx/
+.externalNativeBuild/
+
+# Kotlin
+.kotlin/
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# OS junk
+.DS_Store
+Thumbs.db
