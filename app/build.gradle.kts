@@ -4,6 +4,8 @@ plugins {
 	alias(libs.plugins.kotlin.compose)
 }
 
+val signingStore = providers.gradleProperty("appstats.storeFile").orNull
+
 android {
 	namespace = "fyi.quin.appstats"
 	compileSdk = 36
@@ -17,9 +19,23 @@ android {
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 	}
 
+	signingConfigs {
+		if (signingStore != null) {
+			create("release") {
+				storeFile = file(signingStore)
+				storePassword = providers.gradleProperty("appstats.storePassword").get()
+				keyAlias = providers.gradleProperty("appstats.keyAlias").get()
+				keyPassword = providers.gradleProperty("appstats.keyPassword").get()
+				enableV2Signing = true
+				enableV3Signing = true
+			}
+		}
+	}
+
 	buildTypes {
 		release {
 			isMinifyEnabled = false
+			signingConfig = signingConfigs.findByName("release")
 		}
 	}
 

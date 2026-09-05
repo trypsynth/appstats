@@ -69,6 +69,17 @@ adb connect <ip>:<port>
 export ANDROID_SERIAL=<the mdns name from that list>
 ```
 
+To build a signed release APK, put your signing details in `~/.gradle/gradle.properties`, outside the repository, so they can never be committed:
+
+```
+appstats.storeFile=/path/to/your.jks
+appstats.storePassword=...
+appstats.keyAlias=...
+appstats.keyPassword=...
+```
+
+Then `./gradlew assembleRelease`. Without those properties the release build still works, and produces an unsigned APK.
+
 ## Tests
 
 ```
