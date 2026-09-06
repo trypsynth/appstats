@@ -1,10 +1,17 @@
 package fyi.quin.appstats.model
 
 data class ApkFacts(
-	val detections: List<Detection>,
-	val abis: List<String>,
-	val nativeLibraries: List<String>,
-	val readable: Boolean,
+	val detections: List<Detection> = emptyList(),
+	val abis: List<String> = emptyList(),
+	val nativeLibraries: List<String> = emptyList(),
+	val libraries: Map<String, String> = emptyMap(),
+	val agpVersion: String? = null,
+	val kotlinVersion: String? = null,
+	val gradleVersion: String? = null,
+	val dexCount: Int = 0,
+	val hasBaselineProfile: Boolean = false,
+	val usesKotlin: Boolean = false,
+	val readable: Boolean = false,
 )
 
 data class AppRecord(

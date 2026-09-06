@@ -39,6 +39,12 @@ internal val flutterApp = AppRecord(
 		),
 		abis = listOf("arm64-v8a", "armeabi-v7a"),
 		nativeLibraries = listOf("libapp.so", "libflutter.so", "libsqlite3.so"),
+		libraries = sortedMapOf("androidx.appcompat:appcompat" to "1.7.0"),
+		agpVersion = "8.11.1",
+		kotlinVersion = "2.1.20",
+		dexCount = 3,
+		hasBaselineProfile = true,
+		usesKotlin = true,
 		readable = true,
 	),
 )
@@ -63,7 +69,7 @@ internal val nativeApp = AppRecord(
 	receivers = 9,
 	providers = 6,
 	certSha256 = "AABBCCDDEEFF00112233445566778899",
-	facts = ApkFacts(emptyList(), listOf("arm64-v8a"), listOf("libchrome.so"), true),
+	facts = ApkFacts(abis = listOf("arm64-v8a"), nativeLibraries = listOf("libchrome.so"), dexCount = 12, readable = true),
 )
 
 internal val composeApp = AppRecord(
@@ -92,6 +98,7 @@ internal val composeApp = AppRecord(
 		),
 		abis = listOf("arm64-v8a"),
 		nativeLibraries = listOf("libandroidx.graphics.path.so"),
+		libraries = sortedMapOf("androidx.compose.ui:ui" to "1.8.3"),
 		readable = true,
 	),
 )

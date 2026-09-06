@@ -3,7 +3,6 @@ package fyi.quin.appstats.ui
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import fyi.quin.appstats.data.ApkInspector
 import fyi.quin.appstats.data.PackageScanner
 import fyi.quin.appstats.model.AppRecord
 import kotlinx.coroutines.Dispatchers
@@ -95,9 +94,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 							if (i % WORKERS != worker) continue
 							val name = missing[i]
 							val record = scanner.record(name) ?: continue
-							cache[name] = record.copy(
-								facts = ApkInspector.inspect(scanner.apkPaths(name)),
-							)
+							cache[name] = record.copy(facts = scanner.facts(name))
 						}
 					}
 				}.awaitAll()

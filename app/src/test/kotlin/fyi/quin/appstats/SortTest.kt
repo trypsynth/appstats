@@ -39,7 +39,7 @@ private fun record(
 	providers = 0,
 	certSha256 = "AB",
 	facts = toolkit?.let {
-		ApkFacts(listOf(Detection(it, Confidence.CERTAIN, "lib/x/y.so")), emptyList(), emptyList(), true)
+		ApkFacts(detections = listOf(Detection(it, Confidence.CERTAIN, "lib/x/y.so")), readable = true)
 	},
 )
 

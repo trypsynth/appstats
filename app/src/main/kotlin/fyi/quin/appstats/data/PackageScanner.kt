@@ -6,6 +6,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
+import fyi.quin.appstats.model.ApkFacts
 import fyi.quin.appstats.model.AppRecord
 import java.io.File
 import java.security.MessageDigest
@@ -72,12 +73,16 @@ class PackageScanner(context: Context) {
 		return listOf(app.sourceDir) + splits
 	}
 
-	fun apkPaths(packageName: String): List<String> {
-		return try {
-			apkPaths(pm.getApplicationInfo(packageName, 0))
+	fun facts(packageName: String): ApkFacts {
+		val app = try {
+			pm.getApplicationInfo(packageName, 0)
 		} catch (_: Exception) {
-			emptyList()
+			return ApkFacts()
 		}
+		return ApkInspector.withExtra(
+			ApkInspector.inspect(apkPaths(app)),
+			ResourceProbe.probe(pm, app),
+		)
 	}
 
 	private fun signingFlag(): Int {

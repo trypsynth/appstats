@@ -55,10 +55,18 @@ fun AppDetail(record: AppRecord, actions: RowActions, onCollapseApp: () -> Unit)
 	val permissions = remember(record.packageName) {
 		record.permissions.map { PermissionNames.label(pm, it) }.sorted()
 	}
-	val libraries = record.facts?.nativeLibraries.orEmpty()
+	val nativeLibraries = record.facts?.nativeLibraries.orEmpty()
+	val bundled = remember(record.packageName, record.facts) {
+		record.facts?.libraries.orEmpty().map { "${it.key} ${it.value}" }
+	}
 	Column(Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
 		Separator()
 		Group(buildLines(record), actions, onCollapseApp)
+		val tooling = toolingLines(record)
+		if (tooling.isNotEmpty()) {
+			Separator()
+			Group(tooling, actions, onCollapseApp)
+		}
 		Separator()
 		Group(installLines(record), actions, onCollapseApp)
 		Separator()
@@ -73,10 +81,19 @@ fun AppDetail(record: AppRecord, actions: RowActions, onCollapseApp: () -> Unit)
 			onCollapseApp = onCollapseApp,
 		)
 		SubList(
-			title = "Links against ${plural(libraries.size, "native library", "native libraries")}",
-			items = libraries,
-			noun = "the library list",
-			collapseLabel = "Collapse libraries",
+			title = "Links against ${plural(nativeLibraries.size, "native library", "native libraries")}",
+			items = nativeLibraries,
+			noun = "the native library list",
+			collapseLabel = "Collapse native libraries",
+			resetKey = record.packageName,
+			actions = actions,
+			onCollapseApp = onCollapseApp,
+		)
+		SubList(
+			title = plural(bundled.size, "bundled library", "bundled libraries"),
+			items = bundled,
+			noun = "the bundled library list",
+			collapseLabel = "Collapse bundled libraries",
 			resetKey = record.packageName,
 			actions = actions,
 			onCollapseApp = onCollapseApp,
@@ -255,7 +272,7 @@ private fun buildLines(record: AppRecord): List<Line> {
 			lines.add(
 				Line(
 					label = "Toolkit",
-					value = it.toolkit.label,
+					value = it.label,
 					tail = ", ${it.confidence.label}, from ${it.evidence}",
 				)
 			)
@@ -268,6 +285,23 @@ private fun buildLines(record: AppRecord): List<Line> {
 		if (abis.isEmpty()) Line(value = "No native code")
 		else Line("Native code for", abis.joinToString(", "))
 	)
+	return lines
+}
+
+private fun toolingLines(record: AppRecord): List<Line> {
+	val facts = record.facts ?: return emptyList()
+	if (!facts.readable) return emptyList()
+	val lines = mutableListOf<Line>()
+	facts.agpVersion?.let { lines.add(Line("Built with Android Gradle Plugin", it)) }
+	facts.kotlinVersion?.let { lines.add(Line("Kotlin", it)) }
+	facts.gradleVersion?.let { lines.add(Line("Gradle", it)) }
+	if (facts.kotlinVersion == null && facts.usesKotlin) {
+		lines.add(Line(value = "Contains Kotlin code"))
+	}
+	if (facts.dexCount > 0) {
+		lines.add(Line(value = plural(facts.dexCount, "dex file", "dex files")))
+	}
+	if (facts.hasBaselineProfile) lines.add(Line(value = "Ships a baseline profile"))
 	return lines
 }
 

@@ -58,6 +58,23 @@ private val sample = AppRecord(
 	),
 )
 
+private val versioned = sample.copy(
+	facts = sample.facts!!.copy(
+		detections = listOf(
+			Detection(Toolkit.COMPOSE, Confidence.CERTAIN, "resource string/m3c_dialog", "1.8.3"),
+		),
+		libraries = sortedMapOf(
+			"androidx.appcompat:appcompat" to "1.7.0",
+			"androidx.compose.ui:ui" to "1.8.3",
+		),
+		agpVersion = "8.11.1",
+		kotlinVersion = "2.1.20",
+		dexCount = 3,
+		hasBaselineProfile = true,
+		usesKotlin = true,
+	),
+)
+
 private val noop = RowActions(toggle = {}, open = {}, copy = {}, info = {})
 
 @RunWith(AndroidJUnit4::class)
@@ -130,6 +147,31 @@ class AppRowTest {
 	}
 
 	@Test
+	fun theToolkitLineCarriesTheLibraryVersion() {
+		rule.setContent { AppRow(versioned, expanded = true, sort = Sort.NAME, actions = noop) }
+		rule.onNode(hasText("Jetpack Compose 1.8.3", substring = true))
+			.assert(hasText("certain", substring = true))
+	}
+
+	@Test
+	fun theBuildToolingIsShown() {
+		rule.setContent { AppRow(versioned, expanded = true, sort = Sort.NAME, actions = noop) }
+		rule.onNodeWithText("Built with Android Gradle Plugin 8.11.1").assert(hasCustomAction("Copy"))
+		rule.onNodeWithText("Kotlin 2.1.20").assert(hasCustomAction("Copy"))
+		rule.onNodeWithText("3 dex files").assert(hasCustomAction("Copy"))
+		rule.onNodeWithText("Ships a baseline profile").assert(hasCustomAction("Copy"))
+	}
+
+	@Test
+	fun bundledLibrariesOpenIntoCoordinatesAndVersions() {
+		rule.setContent { AppRow(versioned, expanded = true, sort = Sort.NAME, actions = noop) }
+		rule.onNodeWithText("2 bundled libraries").performClick()
+		rule.onNodeWithText("androidx.appcompat:appcompat 1.7.0")
+			.assert(hasCustomAction("Collapse bundled libraries"))
+		rule.onNodeWithText("androidx.compose.ui:ui 1.8.3").assert(hasCustomAction("Copy"))
+	}
+
+	@Test
 	fun thePermissionCountIsItsOwnButton() {
 		rule.setContent { AppRow(sample, expanded = true, sort = Sort.NAME, actions = noop) }
 		rule.onNodeWithText("1 permission requested")
@@ -141,7 +183,7 @@ class AppRowTest {
 		rule.setContent { AppRow(sample, expanded = true, sort = Sort.NAME, actions = noop) }
 		rule.onNodeWithText("Links against 2 native libraries").performClick()
 		rule.onNodeWithText("libflutter.so")
-			.assert(hasCustomAction("Collapse libraries"))
+			.assert(hasCustomAction("Collapse native libraries"))
 			.assert(hasCustomAction("Collapse app"))
 			.assert(hasCustomAction("Copy"))
 	}
@@ -152,7 +194,7 @@ class AppRowTest {
 		rule.onNodeWithText("Links against 2 native libraries").performClick()
 		val node = rule.onNodeWithText("libflutter.so").fetchSemanticsNode()
 		val collapse = node.config[SemanticsActions.CustomActions]
-			.first { it.label == "Collapse libraries" }
+			.first { it.label == "Collapse native libraries" }
 		rule.runOnUiThread { collapse.action?.invoke() }
 		rule.onAllNodesWithText("libflutter.so").assertCountEquals(0)
 		rule.onNodeWithText("Links against 2 native libraries")
